@@ -25,7 +25,7 @@ Browser-based educational MCA aneurysm clipping simulator (pterional approach). 
 - [x] 0. Monorepo skeleton, CI, placeholder brain, aperture
 - [x] M1 Scene: aperture/vignette, wheel zoom 1-4x, focus slider + DOF, wet PBR brain, HR-driven vertex pulsation, procedural vessel tree + MCA aneurysm sac, raycast tool tip with Shift fine mode, FPS/draw-call overlay (F3)
 - [x] M2 Tools: ten tools in src/tools (toolDefs.ts), keys 1-0, tool belt UI, visible effects, failure-rule unit tests
-- [ ] M3 Steps and mentor: surgeryMachine.ts (XState), step checklist rail, mentor captions, speech synthesis
+- [x] M3 Steps and mentor: surgeryMachine.ts (XState), step checklist rail, mentor captions, speech synthesis
 - [ ] M4 Vitals and rupture: vitalsModel.ts, sparklines/tiles/alarms, Web Audio beep, rupture + recovery
 - [ ] M5 Backend: sessions, gzip telemetry, server-side scoring, debrief, leaderboard (Redis), SSE mentor, Alembic, RLS, rate limits, web client
 - [ ] M6 ML: headless agents, 20k runs, GBM + CNN-GRU skill + LSTM rupture risk, int8 ONNX, worker inference at 10 Hz

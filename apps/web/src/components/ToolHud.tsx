@@ -21,7 +21,7 @@ export function ToolHud() {
   const clMs = useSim((s) => Math.floor(s.clamp.totalMs / 1000) * 1000);
   return (
     <>
-      <div className="absolute inset-x-0 bottom-20 mx-auto flex w-fit gap-2">
+      <div className="absolute inset-x-0 bottom-[10.5rem] mx-auto flex w-fit gap-2">
         <Timer label="Retraction" on={retOn} ms={retMs} limit={RETRACTION_LIMIT_MS} />
         <Timer label="Temp clip" on={clOn} ms={clMs} limit={CLAMP_LIMIT_MS} />
       </div>

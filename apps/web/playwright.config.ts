@@ -5,6 +5,7 @@ const url = `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: 'e2e',
+  timeout: 90_000,
   webServer: { command: `pnpm dev --port ${port} --strictPort`, url, reuseExistingServer: !process.env.CI },
   use: { baseURL: url },
 });

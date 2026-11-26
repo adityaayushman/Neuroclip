@@ -17,6 +17,9 @@ test('renders scene, aperture, debug overlay within draw-call budget', async ({ 
   await page.evaluate(() => window.dispatchEvent(new WheelEvent('wheel', { deltaY: -600, cancelable: true })));
   await expect(page.getByTestId('aperture')).not.toHaveAttribute('data-zoom', '1');
 
+  await expect(page.getByTestId('step-positioning_craniotomy')).toHaveAttribute('data-state', 'current');
+  await expect(page.getByTestId('mentor')).toContainText('pterional craniotomy');
+
   await page.keyboard.press('3');
   await expect(page.getByTestId('tool-microscissors')).toHaveAttribute('aria-pressed', 'true');
   await page.keyboard.press('0');

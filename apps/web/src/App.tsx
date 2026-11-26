@@ -2,6 +2,8 @@ import { Aperture } from './components/Aperture';
 import { Controls } from './components/Controls';
 import { DebugOverlay } from './components/DebugOverlay';
 import { Disclaimer } from './components/Disclaimer';
+import { MentorBar } from './components/MentorBar';
+import { StepRail } from './components/StepRail';
 import { DopplerPanel } from './components/DopplerPanel';
 import { ToolBelt } from './components/ToolBelt';
 import { ToolHud } from './components/ToolHud';
@@ -22,6 +24,8 @@ export function App() {
       <DebugOverlay />
       <ToolHud />
       <DopplerPanel />
+      <StepRail />
+      <MentorBar />
       <ToolBelt />
     </div>
   );

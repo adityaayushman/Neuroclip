@@ -3,6 +3,7 @@ import { Vector3 } from 'three';
 import type { ToolId } from '@neuroclip/shared';
 import { surfacePoint } from '../lib/brain';
 import { mulberry32 } from '../lib/rng';
+import { simHooks, type FactName } from '../sim/events';
 import { TOOL_DEFS, type Failure, type TargetKind, type UseContext } from './toolDefs';
 
 export type V3 = [number, number, number];
@@ -86,7 +87,9 @@ export const useSim = create<SimState>((set, get) => {
     n.events = [...(n.events ?? s.events), { ...f, id: nextId, t: s.clock, tool }].slice(-30);
     n.lastFail = { ...(n.lastFail ?? s.lastFail), [f.code]: s.clock };
     n.nextId = nextId + 1;
+    if (f.severity !== 'info') simHooks.onFact?.({ type: 'FAILURE', tool, code: f.code, severity: f.severity });
   };
+  const fact = (fact: FactName) => simHooks.onFact?.({ type: 'FACT', fact });
 
   return {
     activeTool: 'suction',
@@ -128,6 +131,7 @@ export const useSim = create<SimState>((set, get) => {
         clampMs: s.clamp.totalMs,
         bleeding: s.bleeder !== null,
       };
+      simHooks.onFact?.({ type: 'USE', tool: def.id, target: i.target, fine: i.fine, dtMs: i.dtMs });
       const failure = def.failure(ctx);
       if (failure) emit(s, def.id, failure, n);
 
@@ -149,7 +153,10 @@ export const useSim = create<SimState>((set, get) => {
           if (s.bleeder && dist(s.bleeder.pos, i.point) < 0.09) {
             const size = s.bleeder.size - sec * (i.fine ? 0.6 : 0.35);
             n.bleeder = size > 0 ? { ...s.bleeder, size } : null;
-            if (size <= 0) emit(s, def.id, { code: 'hemostasis', severity: 'info', message: 'Bleeder controlled.' }, n);
+            if (size <= 0) {
+              emit(s, def.id, { code: 'hemostasis', severity: 'info', message: 'Bleeder controlled.' }, n);
+              fact('hemostasis');
+            }
           }
           break;
         case 'cut':
@@ -160,15 +167,23 @@ export const useSim = create<SimState>((set, get) => {
           break;
         case 'retract':
           n.retraction = { ...s.retraction, on: !s.retraction.on, center: s.retraction.on ? s.retraction.center : i.point };
+          fact(s.retraction.on ? 'retract_off' : 'retract_on');
           break;
         case 'clamp_temp':
-          if (i.target === 'vessel') n.clamp = { ...s.clamp, on: !s.clamp.on, pos: s.clamp.on ? s.clamp.pos : i.point };
+          if (i.target === 'vessel') {
+            n.clamp = { ...s.clamp, on: !s.clamp.on, pos: s.clamp.on ? s.clamp.pos : i.point };
+            fact(s.clamp.on ? 'clamp_off' : 'clamp_on');
+          }
           break;
         case 'clip_perm':
-          if (i.target === 'sac' || i.target === 'vessel') n.clips = [...s.clips, i.point];
+          if (i.target === 'sac' || i.target === 'vessel') {
+            n.clips = [...s.clips, i.point];
+            fact('clip_placed');
+          }
           break;
         case 'doppler':
           n.doppler = i.target === 'none' || i.target === 'brain' ? 'none' : s.clamp.on ? 'clamped' : 'flow';
+          if (n.doppler !== s.doppler && n.doppler !== 'none') fact(n.doppler === 'flow' ? 'doppler_flow' : 'doppler_clamped');
           break;
       }
       set(n);

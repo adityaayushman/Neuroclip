@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { pulse, retract } from '../lib/pulse';
 import { useSession } from '../state/session';
+import { surgery } from '../sim/surgeryStore';
 import { useSim, type V3 } from '../tools/toolSim';
 import { ptr } from './pointerState';
 
@@ -24,6 +25,7 @@ export function ToolEffects({ tip }: { tip: THREE.Vector3 }) {
   const decals = useRef<THREE.InstancedMesh>(null);
   const bleeder = useRef<THREE.Mesh>(null);
   const blade = useRef<THREE.Mesh>(null);
+  const tickAcc = useRef(0);
   const clips = useSim((s) => s.clips);
   const clamp = useSim((s) => s.clamp.on);
   const clampPos = useSim((s) => s.clamp.pos);
@@ -61,6 +63,11 @@ export function ToolEffects({ tip }: { tip: THREE.Vector3 }) {
       });
     }
     sim.tick(dt * 1000);
+    tickAcc.current += dt * 1000;
+    if (tickAcc.current >= 250) {
+      surgery.send({ type: 'TICK', dtMs: tickAcc.current });
+      tickAcc.current = 0;
+    }
     const s = useSim.getState();
 
     const im = decals.current;

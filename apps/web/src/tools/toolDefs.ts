@@ -40,6 +40,22 @@ export interface ToolDef {
   failure: (ctx: UseContext) => Failure | null;
 }
 
+export const FAILURE_CODES = [
+  'suction_tissue_damage',
+  'bipolar_thermal_injury',
+  'vessel_nick',
+  'sac_dissection_tear',
+  'over_retraction',
+  'irrigation_overflow',
+  'cottonoid_sac_pressure',
+  'temp_clip_misplaced',
+  'prolonged_clamp',
+  'parent_vessel_occlusion',
+  'sac_clip_rupture',
+  'clip_misplaced',
+  'doppler_no_signal',
+] as const;
+
 export const RETRACTION_LIMIT_MS = 90_000;
 export const CLAMP_LIMIT_MS = 180_000;
 
