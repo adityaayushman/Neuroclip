@@ -1,4 +1,4 @@
-# NeuroClip
+# NeuroClip: developer notes
 
 Browser-based educational MCA aneurysm clipping simulator (pterional approach). Educational use only; no patient data.
 
