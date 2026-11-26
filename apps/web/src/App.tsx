@@ -11,6 +11,7 @@ import { DopplerPanel } from './components/DopplerPanel';
 import { ToolBelt } from './components/ToolBelt';
 import { ToolHud } from './components/ToolHud';
 import { Microscope } from './scene/Microscope';
+import { mlRuntime } from './ml/mlRuntime';
 import { telemetry } from './sim/telemetry';
 import { useMicroscopeInput } from './state/inputHooks';
 import { TOOL_DEFS } from './tools/toolDefs';
@@ -19,6 +20,10 @@ import { useSim } from './tools/toolSim';
 export function App() {
   useMicroscopeInput();
   useEffect(() => telemetry.start(), []);
+  useEffect(() => {
+    mlRuntime.start();
+    return () => mlRuntime.stop();
+  }, []);
   const cursor = useSim((s) => TOOL_DEFS[s.activeTool].cursor);
   return (
     <div className="relative h-full w-full bg-black text-slate-200" style={{ cursor }}>

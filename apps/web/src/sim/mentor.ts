@@ -52,6 +52,9 @@ export const ALARM_LINES: Record<string, string> = {
   icp_high: 'ICP is critically high. Release the retractor and the temporary clip.',
 };
 
+export const RISK_LINE =
+  'Rupture risk is high right now. Slow down, use fine mode (Shift) near the sac and keep suction ready.';
+
 export const SLOW_LINE = 'This step is taking longer than expected. Re-read the checklist and keep moving.';
 
 export function wrongToolLine(stepTitle: string, tool: ToolId, allowed: ToolId[]): string {

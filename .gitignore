@@ -12,3 +12,11 @@ test-results
 *.onnx
 *.pt
 *.db
+ml/data/
+ml/data_smoke/
+ml/.venv/
+ml/artifacts/*.pt
+!apps/web/public/models/*.onnx
+apps/web/public/ort/
+ml/artifacts/run.log
+ml/artifacts/*.fp32.onnx

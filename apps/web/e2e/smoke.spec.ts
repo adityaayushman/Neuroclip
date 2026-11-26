@@ -20,6 +20,8 @@ test('renders scene, aperture, debug overlay within draw-call budget', async ({ 
   await expect(page.getByTestId('step-positioning_craniotomy')).toHaveAttribute('data-state', 'current');
   await expect(page.getByTestId('mentor')).toContainText('pterional craniotomy');
 
+  await expect(page.getByTestId('debug-ml')).toHaveText(/^ML [\d.]+ ms/, { timeout: 60_000 });
+
   await page.keyboard.press('3');
   await expect(page.getByTestId('tool-microscissors')).toHaveAttribute('aria-pressed', 'true');
   await page.keyboard.press('0');

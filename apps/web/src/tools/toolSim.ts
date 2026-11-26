@@ -167,7 +167,7 @@ export const useSim = create<SimState>((set, get) => {
       simHooks.onFact?.({ type: 'USE', tool: def.id, target: i.target, fine: i.fine, dtMs: i.dtMs });
       const failure = def.failure(ctx);
       const emitted = failure ? emit(s, def.id, failure, n) : false;
-      const ruptured = emitted && failure?.severity === 'rupture';
+      const ruptured = emitted && failure?.severity === 'rupture' && !(s.bleeder && s.bleeder.rate >= RUPTURE_RATE);
 
       const sec = i.dtMs / 1000;
       switch (def.effect) {

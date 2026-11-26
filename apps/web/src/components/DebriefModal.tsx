@@ -13,7 +13,7 @@ const BARS: { key: 'completion' | 'safety' | 'blood' | 'efficiency'; label: stri
 ];
 
 export function DebriefModal() {
-  const { phase, debrief, leaderboard, error, save, close } = useRun();
+  const { phase, debrief, leaderboard, error, mlSkill, save, close } = useRun();
   const [name, setName] = useState(defaultName);
   if (phase === 'idle') return null;
   const valid = /^[\w .-]{1,24}$/.test(name.trim());
@@ -105,7 +105,12 @@ export function DebriefModal() {
                   <li>Critical alarms: {debrief.summary.alarms}</li>
                   <li>Peak ICP: {debrief.summary.max_icp} mmHg</li>
                   <li>Lowest systolic BP: {debrief.summary.min_sbp} mmHg</li>
-                  {debrief.ml_skill !== null && <li>Skill vs expert: {Math.round(debrief.ml_skill * 100)}%</li>}
+                  {(debrief.ml_skill ?? mlSkill) !== null && (
+                    <li data-testid="ml-skill">
+                      Skill vs expert: {Math.round(((debrief.ml_skill ?? mlSkill) as number) * 100)}%{' '}
+                      <span className="text-slate-500">(estimated in your browser, not part of the score)</span>
+                    </li>
+                  )}
                 </ul>
               </section>
             </div>

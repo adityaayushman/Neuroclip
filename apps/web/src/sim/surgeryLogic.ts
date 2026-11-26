@@ -1,6 +1,6 @@
 import { STEPS, type Mode, type Step } from '@neuroclip/shared';
 import type { SimFact } from './events';
-import { ALARM_LINES, ERROR_LINES, RUPTURE_CUE, SLOW_LINE, STEP_INTRO, mentorAudible, wrongToolLine, type MentorKind, type MentorLine } from './mentor';
+import { ALARM_LINES, ERROR_LINES, RISK_LINE, RUPTURE_CUE, SLOW_LINE, STEP_INTRO, mentorAudible, wrongToolLine, type MentorKind, type MentorLine } from './mentor';
 import { STEP_DEFS, itemDone, stepDef, type Progress, type World } from './steps';
 import type { Severity } from '../tools/toolDefs';
 
@@ -30,6 +30,7 @@ export interface SurgeryContext {
 export type SurgeryEvent =
   | SimFact
   | { type: 'CONFIRM'; itemId: string }
+  | { type: 'RISK'; p: number }
   | { type: 'TICK'; dtMs: number }
   | { type: 'SET_MODE'; mode: Mode }
   | { type: 'RESET' };
@@ -128,6 +129,8 @@ export function applyEvent(c: SurgeryContext, e: SurgeryEvent): SurgeryContext {
     }
     case 'ALARM':
       return recordError(c, 'vitals', `alarm_${e.code}`, 'injury', ALARM_LINES[e.code] ?? 'Check the monitor.');
+    case 'RISK':
+      return say(c, RISK_LINE, 'hint');
     case 'CONFIRM': {
       const it = stepDef(c.step).items.find((i) => i.id === e.itemId && i.confirm);
       if (!it || (c.progress[it.id] ?? 0) >= it.target) return c;

@@ -1,0 +1,311 @@
+{
+ "features": [
+  "hr",
+  "sbp",
+  "spo2",
+  "icp",
+  "vol",
+  "bleed",
+  "pool",
+  "retract_load",
+  "clamp_load",
+  "tool_suction",
+  "tool_bipolar",
+  "tool_microscissors",
+  "tool_dissector",
+  "tool_retractor",
+  "tool_irrigation",
+  "tool_cottonoid",
+  "tool_temporary_clip",
+  "tool_clip_applier",
+  "tool_doppler",
+  "tgt_brain",
+  "tgt_vessel",
+  "tgt_sac",
+  "tgt_none",
+  "fine",
+  "down",
+  "err_warn",
+  "err_injury",
+  "err_rupture",
+  "step_frac",
+  "step_overrun",
+  "switches"
+ ],
+ "window_steps": 48,
+ "horizon_s": 10.0,
+ "expert_threshold": 0.65,
+ "data": {
+  "runs": 20000,
+  "windows": 58578,
+  "rupture_windows": 58377,
+  "users": 40
+ },
+ "cv": {
+  "users": 40,
+  "deep_folds": 8,
+  "epochs": 6
+ },
+ "skill": {
+  "gbm": {
+   "auc_expert": 0.9629281954329918,
+   "f1_expert": 0.8473991572826061,
+   "mae": 0.10715403095984431,
+   "spearman": 0.8767211105328386,
+   "n": 58578
+  },
+  "net": {
+   "auc_expert": 0.965723469715187,
+   "f1_expert": 0.8535368504248172,
+   "mae": 0.10283575128752831,
+   "spearman": 0.8859196238326277,
+   "n": 58578
+  },
+  "params": 33217
+ },
+ "rupture": {
+  "gbm": {
+   "auc": 0.8755720610503054,
+   "f1": 0.583251425201494,
+   "threshold": 0.2746005098751517,
+   "brier": 0.10436915581376881,
+   "ece": 0.015215271863359758,
+   "positive_rate": 0.18080197569376746,
+   "n": 46161,
+   "ece_raw": 0.08762276755234917,
+   "auc_all_windows": 0.8928767680022647,
+   "platt_a": 0.907701885079803,
+   "platt_b": -0.8035455454458745,
+   "reliability": [
+    {
+     "bin": 0,
+     "n": 22634,
+     "mean_pred": 0.019191083726261788,
+     "frac_pos": 0.015110011487143235
+    },
+    {
+     "bin": 1,
+     "n": 7588,
+     "mean_pred": 0.14796505182809833,
+     "frac_pos": 0.14180284659989456
+    },
+    {
+     "bin": 2,
+     "n": 5020,
+     "mean_pred": 0.2470781573819653,
+     "frac_pos": 0.2707171314741036
+    },
+    {
+     "bin": 3,
+     "n": 3460,
+     "mean_pred": 0.34792440339519376,
+     "frac_pos": 0.3809248554913295
+    },
+    {
+     "bin": 4,
+     "n": 2631,
+     "mean_pred": 0.4475601552233343,
+     "frac_pos": 0.492208285822881
+    },
+    {
+     "bin": 5,
+     "n": 1931,
+     "mean_pred": 0.5470214399387717,
+     "frac_pos": 0.5484205075090627
+    },
+    {
+     "bin": 6,
+     "n": 1262,
+     "mean_pred": 0.6466110406697784,
+     "frac_pos": 0.5816164817749604
+    },
+    {
+     "bin": 7,
+     "n": 980,
+     "mean_pred": 0.7446068685247961,
+     "frac_pos": 0.6255102040816326
+    },
+    {
+     "bin": 8,
+     "n": 536,
+     "mean_pred": 0.8428525178851247,
+     "frac_pos": 0.8283582089552238
+    },
+    {
+     "bin": 9,
+     "n": 119,
+     "mean_pred": 0.9218109479490761,
+     "frac_pos": 0.8907563025210085
+    }
+   ]
+  },
+  "net": {
+   "auc": 0.8774869782222968,
+   "f1": 0.5826712425367871,
+   "threshold": 0.2585079191395236,
+   "brier": 0.10301682615094244,
+   "ece": 0.014005734404821465,
+   "positive_rate": 0.18080197569376746,
+   "n": 46161,
+   "ece_raw": 0.08775964579664712,
+   "auc_all_windows": 0.8945464909917347,
+   "platt_a": 0.8736639713283858,
+   "platt_b": -0.8229852486451792,
+   "reliability": [
+    {
+     "bin": 0,
+     "n": 22886,
+     "mean_pred": 0.017998707139548504,
+     "frac_pos": 0.0156864458620991
+    },
+    {
+     "bin": 1,
+     "n": 7260,
+     "mean_pred": 0.14894613348659325,
+     "frac_pos": 0.14449035812672176
+    },
+    {
+     "bin": 2,
+     "n": 4971,
+     "mean_pred": 0.24758151041459334,
+     "frac_pos": 0.26634479983906656
+    },
+    {
+     "bin": 3,
+     "n": 3475,
+     "mean_pred": 0.34645197116912396,
+     "frac_pos": 0.35079136690647483
+    },
+    {
+     "bin": 4,
+     "n": 2788,
+     "mean_pred": 0.44909843906706987,
+     "frac_pos": 0.49856527977044474
+    },
+    {
+     "bin": 5,
+     "n": 1894,
+     "mean_pred": 0.5456519510445035,
+     "frac_pos": 0.5691657866948258
+    },
+    {
+     "bin": 6,
+     "n": 1102,
+     "mean_pred": 0.6456377537711199,
+     "frac_pos": 0.5317604355716878
+    },
+    {
+     "bin": 7,
+     "n": 923,
+     "mean_pred": 0.7450932285618865,
+     "frac_pos": 0.6240520043336945
+    },
+    {
+     "bin": 8,
+     "n": 852,
+     "mean_pred": 0.8482433143614311,
+     "frac_pos": 0.886150234741784
+    },
+    {
+     "bin": 9,
+     "n": 10,
+     "mean_pred": 0.9059654148936662,
+     "frac_pos": 1.0
+    }
+   ]
+  },
+  "params": 24897,
+  "natural_rate": 0.18080197569376746,
+  "train_positive_rate": 0.35222776093324426,
+  "platt_a": 0.8736639713283858,
+  "platt_b": -0.8229852486451792,
+  "alert_threshold": 0.2585079191395236
+ },
+ "export": {
+  "skill": {
+   "size_mb": 0.082444,
+   "size_safe_mb": 0.137189,
+   "quant_ops": "MatMul+Gemm+LSTM+Conv",
+   "ops": {
+    "Constant": 6,
+    "Reshape": 2,
+    "Transpose": 3,
+    "DynamicQuantizeLinear": 3,
+    "Mul": 6,
+    "ConvInteger": 2,
+    "Cast": 3,
+    "Add": 3,
+    "Relu": 2,
+    "Shape": 1,
+    "Gather": 2,
+    "Unsqueeze": 1,
+    "Concat": 1,
+    "ConstantOfShape": 1,
+    "GRU": 1,
+    "MatMulInteger": 1,
+    "Squeeze": 1
+   },
+   "ops_safe": {
+    "Constant": 6,
+    "Transpose": 3,
+    "Conv": 2,
+    "Relu": 2,
+    "Shape": 1,
+    "Gather": 2,
+    "Unsqueeze": 1,
+    "Concat": 1,
+    "ConstantOfShape": 1,
+    "GRU": 1,
+    "DynamicQuantizeLinear": 1,
+    "Mul": 2,
+    "MatMulInteger": 1,
+    "Cast": 1,
+    "Add": 1,
+    "Squeeze": 1
+   },
+   "max_logit_diff": 0.10187697410583496,
+   "median_ms": 0.9760999982972862,
+   "p95_ms": 1.0913450005318737
+  },
+  "rupture": {
+   "size_mb": 0.030768,
+   "size_safe_mb": 0.030768,
+   "quant_ops": "MatMul+Gemm+LSTM+Conv",
+   "ops": {
+    "Constant": 7,
+    "Shape": 1,
+    "Transpose": 2,
+    "Gather": 2,
+    "Unsqueeze": 1,
+    "Concat": 1,
+    "ConstantOfShape": 1,
+    "DynamicQuantizeLSTM": 1,
+    "Squeeze": 2,
+    "DynamicQuantizeLinear": 1,
+    "Mul": 2,
+    "MatMulInteger": 1,
+    "Cast": 1,
+    "Add": 1
+   },
+   "ops_safe": {
+    "Constant": 7,
+    "Shape": 1,
+    "Transpose": 2,
+    "Gather": 2,
+    "Unsqueeze": 1,
+    "Concat": 1,
+    "ConstantOfShape": 1,
+    "DynamicQuantizeLSTM": 1,
+    "Squeeze": 2,
+    "DynamicQuantizeLinear": 1,
+    "Mul": 2,
+    "MatMulInteger": 1,
+    "Cast": 1,
+    "Add": 1
+   },
+   "max_logit_diff": 0.11414575576782227,
+   "median_ms": 0.20774999939021654,
+   "p95_ms": 0.22492999905807665
+  }
+ }
+}

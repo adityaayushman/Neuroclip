@@ -22,6 +22,13 @@ Browser-based educational MCA aneurysm clipping simulator (pterional approach). 
 - Migrations: `alembic upgrade head` from `apps/api`. Set `AUTO_CREATE_TABLES=true` only for local SQLite dev.
 - Web talks to it via `apps/web/src/api/client.ts`; set `VITE_API_URL`.
 
+## ML (ml/, apps/web/src/ml)
+- Features live in `apps/web/src/ml/features.ts` (31 features, 48 s windows of 1 s blocks built from 10 Hz samples). The same code builds training data headlessly and live windows in the browser worker, so keep them in sync; `model_meta.json` is checked against `FEATURES` in a test.
+- Headless agents: `apps/web/src/ml/headless` (scripted agents of varying skill drive the real sim). Generate data with `node ml/datagen/run_all.mjs 20000` (needs `pnpm install`, uses `tsx`).
+- Train/evaluate/export (from `ml/`, venv with CPU torch): `python -m neuroclip_ml.run_all --data data --out artifacts`. It rewrites the metrics table in `ml/README.md`, writes model cards, and copies int8 ONNX + `model_meta.json` to `apps/web/public/models`.
+- Browser: `mlRuntime` samples at 10 Hz into `inference.worker.ts` (onnxruntime-web wasm, single thread). `scripts/copy-ort.mjs` copies the wasm binary into `public/ort` before dev/build. Rupture-risk warnings go to the mentor as hints (silent in Expert mode); the debrief skill estimate is shown but is not part of the server score.
+- The models describe scripted agents, not real surgeons. Do not present them as validated.
+
 ## Conventions
 - Small milestones: short plan, implement, run lint + typecheck + tests, conventional commit.
 - Concise code; comments only for non-obvious logic.
@@ -36,5 +43,5 @@ Browser-based educational MCA aneurysm clipping simulator (pterional approach). 
 - [x] M3 Steps and mentor: surgeryMachine.ts (XState), step checklist rail, mentor captions, speech synthesis
 - [x] M4 Vitals and rupture: vitalsModel.ts, sparklines/tiles/alarms, Web Audio beep, rupture + recovery
 - [x] M5 Backend: sessions, gzip telemetry, server-side scoring, debrief, leaderboard (Redis), SSE mentor, Alembic, RLS, rate limits, web client
-- [ ] M6 ML: headless agents, 20k runs, GBM + CNN-GRU skill + LSTM rupture risk, int8 ONNX, worker inference at 10 Hz
+- [x] M6 ML: headless agents, 20k runs, GBM + CNN-GRU skill + LSTM rupture risk, int8 ONNX, worker inference at 10 Hz
 - [ ] M7 Polish and launch: intro, sound, share card, GIF replay, Emergency mode, anatomy seeds, settings, references, Lighthouse, README, Vercel + Fly.io deploy

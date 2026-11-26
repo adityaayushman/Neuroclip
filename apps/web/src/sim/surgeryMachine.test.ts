@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { FAILURE_CODES, TOOL_DEFS, type TargetKind, type UseContext } from '../tools/toolDefs';
 import { useSim } from '../tools/toolSim';
 import { simHooks, type SimFact } from './events';
-import { ALARM_LINES, ERROR_LINES, STEP_INTRO } from './mentor';
+import { ALARM_LINES, ERROR_LINES, RISK_LINE, STEP_INTRO } from './mentor';
 import { STEP_DEFS } from './steps';
 import { surgeryMachine } from './surgeryMachine';
 
@@ -96,6 +96,20 @@ describe('surgery machine', () => {
     a.send({ type: 'TICK', dtMs: 6000 });
     a.send({ type: 'FAILURE', tool: 'doppler', code: 'doppler_no_signal', severity: 'warning' });
     expect(a.getSnapshot().context.mentor!.text).toContain('No signal');
+  });
+
+  it('ML rupture-risk warnings are hints: shown in guided, silent in expert, never over a serious message', () => {
+    const guided = start();
+    guided.send({ type: 'RISK', p: 0.7 });
+    expect(guided.getSnapshot().context.mentor?.text).toBe(RISK_LINE);
+    const held = start();
+    held.send({ type: 'FAILURE', tool: 'microscissors', code: 'vessel_nick', severity: 'rupture' });
+    const text = held.getSnapshot().context.mentor!.text;
+    held.send({ type: 'RISK', p: 0.7 });
+    expect(held.getSnapshot().context.mentor!.text).toBe(text);
+    const expert = start('expert');
+    expert.send({ type: 'RISK', p: 0.7 });
+    expect(expert.getSnapshot().context.mentor).toBeNull();
   });
 
   it('expert mode hides hints but still reports ruptures', () => {

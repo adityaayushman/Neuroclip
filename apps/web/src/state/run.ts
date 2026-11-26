@@ -1,6 +1,7 @@
 import type { Debrief, LeaderboardEntry, TelemetryEvent } from '@neuroclip/shared';
 import { create } from 'zustand';
 import { ApiError, getLeaderboard, loadPlayer, saveRun } from '../api/client';
+import { useMl } from '../ml/mlStore';
 import { telemetry } from '../sim/telemetry';
 import { useSession } from './session';
 
@@ -12,6 +13,7 @@ interface RunState {
   debrief: Debrief | null;
   leaderboard: LeaderboardEntry[];
   error: string | null;
+  mlSkill: number | null;
   open: () => void;
   save: (name: string) => Promise<void>;
   close: () => void;
@@ -27,7 +29,9 @@ export const useRun = create<RunState>((set, get) => ({
   debrief: null,
   leaderboard: [],
   error: null,
-  open: () => set({ phase: 'naming', events: telemetry.snapshot(), error: null, debrief: null }),
+  mlSkill: null,
+  open: () =>
+    set({ phase: 'naming', events: telemetry.snapshot(), error: null, debrief: null, mlSkill: useMl.getState().skillEstimate() }),
   save: async (name) => {
     set({ phase: 'saving', error: null });
     try {

@@ -7,7 +7,7 @@ const uuid = '3f2504e0-4f89-41d3-9a0c-0305e82c3301';
 
 afterEach(() => {
   cleanup();
-  useRun.setState({ phase: 'idle', debrief: null, leaderboard: [], error: null });
+  useRun.setState({ phase: 'idle', debrief: null, leaderboard: [], error: null, mlSkill: null });
 });
 
 describe('DebriefModal', () => {
@@ -38,6 +38,7 @@ describe('DebriefModal', () => {
           },
           flagged: false, flags: [], ml_skill: null, rank: 2,
         },
+        mlSkill: 0.62,
         leaderboard: [
           { rank: 1, display_name: 'Ada', score: 900, duration_ms: 90000, mode: 'guided', run_id: '00000000-0000-4000-8000-000000000000' },
           { rank: 2, display_name: 'You', score: 777, duration_ms: 125000, mode: 'guided', run_id: uuid },
@@ -47,6 +48,7 @@ describe('DebriefModal', () => {
     expect(screen.getByTestId('score').textContent).toContain('777');
     expect(screen.getByTestId('rank').textContent).toContain('#2');
     expect(screen.getByTestId('blood-estimate').textContent).toContain('1400');
+    expect(screen.getByTestId('ml-skill').textContent).toContain('62%');
     expect(screen.getByText(/vessel_nick/)).toBeTruthy();
     expect(screen.getByText('Dural opening', { exact: false })).toBeTruthy();
     const rows = screen.getByTestId('leaderboard').querySelectorAll('tr');
