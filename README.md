@@ -4,7 +4,6 @@ A browser-based, educational brain aneurysm clipping simulator. You work through
 
 > **Educational use only.** NeuroClip is not a medical device, uses no patient data and must not guide any clinical decision. The physiology is simplified and partly invented.
 
-<!-- Hero GIF: play a run, then use "Export last 15 s (GIF)" in the debrief and save it as docs/hero.gif. -->
 
 ## Play
 
@@ -86,3 +85,7 @@ See [docs/DEPLOY.md](docs/DEPLOY.md) for the Vercel (web) and Fly.io (API) steps
 - Row-level security, Redis and the live LLM mentor are untested against real services.
 - The layout targets desktop screens and is poor on narrow ones.
 - The replay GIF records the last 15 seconds of the rendered view, not a deterministic re-simulation.
+
+## More
+
+Architecture, API, scoring and ML pipeline notes for contributors are in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
