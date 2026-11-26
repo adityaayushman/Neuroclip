@@ -44,4 +44,5 @@ Browser-based educational MCA aneurysm clipping simulator (pterional approach). 
 - [x] M4 Vitals and rupture: vitalsModel.ts, sparklines/tiles/alarms, Web Audio beep, rupture + recovery
 - [x] M5 Backend: sessions, gzip telemetry, server-side scoring, debrief, leaderboard (Redis), SSE mentor, Alembic, RLS, rate limits, web client
 - [x] M6 ML: headless agents, 20k runs, GBM + CNN-GRU skill + LSTM rupture risk, int8 ONNX, worker inference at 10 Hz
-- [ ] M7 Polish and launch: intro, sound, share card, GIF replay, Emergency mode, anatomy seeds, settings, references, Lighthouse, README, Vercel + Fly.io deploy
+- [x] M7 Polish (in repo): intro, sfx, share card PNG, last-15s GIF export, Emergency mode (state/startRun.ts), 3 anatomy variants (lib/anatomy.ts, seed-1 mod 3), settings (state/settings.ts), References page (#/references), README, deploy config (vercel.json, apps/api/Dockerfile + fly.toml, docs/DEPLOY.md)
+- [ ] M7 Launch: production deploy and live URL need the owner's Vercel/Fly.io accounts; Lighthouse perf needs a real GPU

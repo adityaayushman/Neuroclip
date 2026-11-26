@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { paletteFor, useSettings } from '../state/settings';
 import { useSim } from '../tools/toolSim';
 
 const COUNT = 160;
@@ -11,6 +12,8 @@ const t1 = new THREE.Vector3();
 const t2 = new THREE.Vector3();
 
 export function BloodParticles() {
+  const skip = useSettings((s) => s.skipBlood);
+  const color = paletteFor(useSettings((s) => s.colorblind)).blood;
   const points = useRef<THREE.Points>(null);
   const state = useMemo(
     () => ({
@@ -30,7 +33,7 @@ export function BloodParticles() {
   useFrame((_, dt) => {
     const { bleeder } = useSim.getState();
     const { pos, vel, life } = state;
-    const emit = bleeder && bleeder.rate >= SPURT_RATE ? 90 * bleeder.size : 0;
+    const emit = !skip && bleeder && bleeder.rate >= SPURT_RATE ? 90 * bleeder.size : 0;
     state.carry += emit * dt;
     for (let i = 0; i < COUNT; i++) {
       if (life[i]! > 0) {
@@ -64,7 +67,7 @@ export function BloodParticles() {
 
   return (
     <points ref={points} geometry={geometry} frustumCulled={false} raycast={() => null}>
-      <pointsMaterial color="#9b0d14" size={0.022} sizeAttenuation transparent opacity={0.9} depthWrite={false} />
+      <pointsMaterial color={color} size={0.022} sizeAttenuation transparent opacity={0.9} depthWrite={false} />
     </points>
   );
 }

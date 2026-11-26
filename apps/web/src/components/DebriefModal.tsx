@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { cardData, download, shareCardBlob } from '../lib/shareCard';
+import { encodeGif, replay } from '../lib/replay';
 import { STEP_DEFS } from '../sim/steps';
 import { defaultName, useRun } from '../state/run';
 
@@ -15,6 +17,7 @@ const BARS: { key: 'completion' | 'safety' | 'blood' | 'efficiency'; label: stri
 export function DebriefModal() {
   const { phase, debrief, leaderboard, error, mlSkill, save, close } = useRun();
   const [name, setName] = useState(defaultName);
+  const [busy, setBusy] = useState<string | null>(null);
   if (phase === 'idle') return null;
   const valid = /^[\w .-]{1,24}$/.test(name.trim());
 
@@ -146,7 +149,40 @@ export function DebriefModal() {
               </table>
             </section>
 
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                data-testid="share-card"
+                disabled={busy !== null}
+                onClick={async () => {
+                  setBusy('card');
+                  try {
+                    download(await shareCardBlob(cardData(debrief, name)), 'neuroclip-result.png');
+                  } finally {
+                    setBusy(null);
+                  }
+                }}
+                className="rounded bg-slate-700 px-3 py-1 disabled:opacity-40"
+              >
+                Download result card (PNG)
+              </button>
+              <button
+                data-testid="export-gif"
+                disabled={busy !== null || replay.length < 2}
+                title="Encodes the last 15 seconds of the microscope view"
+                onClick={() => {
+                  setBusy('gif');
+                  setTimeout(() => {
+                    try {
+                      download(new Blob([new Uint8Array(encodeGif(replay.snapshot()))], { type: 'image/gif' }), 'neuroclip-replay.gif');
+                    } finally {
+                      setBusy(null);
+                    }
+                  }, 30);
+                }}
+                className="rounded bg-slate-700 px-3 py-1 disabled:opacity-40"
+              >
+                {busy === 'gif' ? 'Encoding…' : 'Export last 15 s (GIF)'}
+              </button>
               <button onClick={() => window.location.reload()} className="rounded bg-sky-600 px-3 py-1 text-white">
                 Play again
               </button>

@@ -4,11 +4,15 @@ import { DepthOfField, EffectComposer } from '@react-three/postprocessing';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { createBrainGeometry } from '../lib/brain';
+import { replay } from '../lib/replay';
 import { applyPulse, pulse, pulseWave } from '../lib/pulse';
 import { createVesselTree } from '../lib/vessels';
 import { useSession } from '../state/session';
+import { paletteFor, useSettings } from '../state/settings';
 import type { TargetKind } from '../tools/toolDefs';
 import { useVitals } from '../sim/vitalsStore';
+import { telemetry } from '../sim/telemetry';
+import { useMl } from '../ml/mlStore';
 import { useSim, type V3 } from '../tools/toolSim';
 import { ptr } from './pointerState';
 import { ToolEffects } from './ToolEffects';
@@ -16,7 +20,6 @@ import { ToolEffects } from './ToolEffects';
 const BASE_FOV = 40;
 const NEAR = 0.1;
 const FAR = 10;
-const SEED = 1;
 const tipTarget = new THREE.Vector3();
 const lastHit = new THREE.Vector3();
 let hasHit = false;
@@ -40,7 +43,7 @@ function Rig() {
       camera.updateProjectionMatrix();
     }
     phase.current += (dt * hr) / 60;
-    pulse.value = pulseWave(phase.current);
+    pulse.value = useSettings.getState().reducedMotion ? 0 : pulseWave(phase.current);
   });
 
   useFrame((_, dt) => {
@@ -54,6 +57,7 @@ function Rig() {
       });
       acc.current = { t: 0, frames: 0 };
     }
+    replay.capture(gl.domElement, performance.now());
     gl.info.reset();
   }, 2);
   return null;
@@ -61,7 +65,10 @@ function Rig() {
 
 function Tissue() {
   const brain = useMemo(() => createBrainGeometry(), []);
-  const tree = useMemo(() => createVesselTree(SEED), []);
+  const seed = useSession((s) => s.seed);
+  const runId = useSession((s) => s.runId);
+  const cb = useSettings((s) => s.colorblind);
+  const tree = useMemo(() => createVesselTree(seed), [seed]);
   const sacCenter = tree.aneurysm.center;
 
   useEffect(() => {
@@ -69,7 +76,9 @@ function Tissue() {
     const sac = tree.aneurysm.center;
     useSim.getState().reset([m.x, m.y, m.z], [sac.x, sac.y, sac.z]);
     useVitals.getState().reset();
-  }, [tree]);
+    telemetry.reset();
+    useMl.getState().reset();
+  }, [tree, runId]);
 
   const brainMat = useMemo(() => {
     const m = new THREE.MeshPhysicalMaterial({
@@ -83,16 +92,17 @@ function Tissue() {
     applyPulse(m, 0.02);
     return m;
   }, []);
+  const pal = paletteFor(cb);
   const vesselMat = useMemo(() => {
-    const m = new THREE.MeshPhysicalMaterial({ color: '#a3171f', roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.1 });
+    const m = new THREE.MeshPhysicalMaterial({ color: pal.vessel, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.1 });
     applyPulse(m, 0.012);
     return m;
-  }, []);
+  }, [pal.vessel]);
   const sacMat = useMemo(() => {
-    const m = new THREE.MeshPhysicalMaterial({ color: '#c0262d', roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.08 });
+    const m = new THREE.MeshPhysicalMaterial({ color: pal.sac, roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.08 });
     applyPulse(m, 0.03);
     return m;
-  }, []);
+  }, [pal.sac]);
 
   const move = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();

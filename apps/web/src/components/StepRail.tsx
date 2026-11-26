@@ -2,6 +2,7 @@ import { STEPS, type Mode } from '@neuroclip/shared';
 import { STEP_DEFS, itemDone } from '../sim/steps';
 import { surgery, useSurgery } from '../sim/surgeryStore';
 import { useSession } from '../state/session';
+import { startRun } from '../state/startRun';
 
 const MODES: Mode[] = ['guided', 'expert', 'emergency'];
 
@@ -26,8 +27,11 @@ export function StepRail() {
           value={mode}
           onChange={(e) => {
             const m = e.target.value as Mode;
-            setMode(m);
-            surgery.send({ type: 'SET_MODE', mode: m });
+            if (m === 'emergency' || mode === 'emergency') startRun(m);
+            else {
+              setMode(m);
+              surgery.send({ type: 'SET_MODE', mode: m });
+            }
           }}
           className="rounded bg-slate-800 px-1 py-0.5"
         >

@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes introFade {
+  0%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+html[data-cb='1'] .text-emerald-400,
+html[data-cb='1'] .text-emerald-300 { color: #56b4e9; }
+html[data-cb='1'] .bg-emerald-700 { background-color: #0072b2; }
+html[data-cb='1'] .text-red-300 { color: #e69f00; }
+
 html,
 body,
 #root {

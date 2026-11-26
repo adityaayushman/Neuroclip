@@ -14,6 +14,8 @@ export interface Stats {
 
 interface SessionState {
   mode: Mode;
+  seed: number;
+  runId: number;
   zoom: number;
   focus: number;
   hr: number;
@@ -23,6 +25,8 @@ interface SessionState {
   audio: boolean;
   stats: Stats;
   setMode: (m: Mode) => void;
+  setSeed: (seed: number) => void;
+  bumpRun: () => void;
   setZoom: (z: number) => void;
   setFocus: (f: number) => void;
   setHr: (hr: number) => void;
@@ -35,6 +39,8 @@ interface SessionState {
 
 export const useSession = create<SessionState>((set) => ({
   mode: 'guided',
+  seed: 1,
+  runId: 0,
   zoom: 1,
   focus: 0.43,
   hr: 72,
@@ -44,6 +50,8 @@ export const useSession = create<SessionState>((set) => ({
   audio: false,
   stats: { fps: 0, calls: 0, triangles: 0 },
   setMode: (mode) => set({ mode }),
+  setSeed: (seed) => set({ seed: Math.max(1, Math.floor(seed)) }),
+  bumpRun: () => set((s) => ({ runId: s.runId + 1 })),
   setZoom: (z) => set({ zoom: clampZoom(z) }),
   setFocus: (f) => set({ focus: clamp(f, 0, 1) }),
   setHr: (hr) => set({ hr: clamp(hr, 30, 200) }),

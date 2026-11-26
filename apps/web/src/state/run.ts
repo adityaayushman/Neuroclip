@@ -19,8 +19,6 @@ interface RunState {
   close: () => void;
 }
 
-const SEED = 1;
-
 export const defaultName = () => loadPlayer()?.display_name ?? '';
 
 export const useRun = create<RunState>((set, get) => ({
@@ -35,7 +33,7 @@ export const useRun = create<RunState>((set, get) => ({
   save: async (name) => {
     set({ phase: 'saving', error: null });
     try {
-      const { debrief } = await saveRun(name.trim(), useSession.getState().mode, SEED, get().events);
+      const { debrief } = await saveRun(name.trim(), useSession.getState().mode, useSession.getState().seed, get().events);
       const lb = await getLeaderboard(debrief.mode).catch(() => null);
       set({ phase: 'done', debrief, leaderboard: lb?.entries ?? [] });
     } catch (e) {

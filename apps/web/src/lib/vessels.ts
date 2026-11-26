@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { anatomyFor, type Anatomy } from './anatomy';
 import { surfacePoint } from './brain';
 import { mulberry32 } from './rng';
 
@@ -12,7 +13,7 @@ export interface VesselTree {
 
 const dir = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z).normalize();
 
-export function createVesselTree(seed = 1, depth = 3): VesselTree {
+export function createVesselTree(seed = 1, depth = 3, anatomy: Anatomy = anatomyFor(seed)): VesselTree {
   const rand = mulberry32(seed);
   const tubes: THREE.BufferGeometry[] = [];
   const mids: THREE.Vector3[] = [];
@@ -46,14 +47,14 @@ export function createVesselTree(seed = 1, depth = 3): VesselTree {
   };
 
   const m1Start = dir(0.95, -0.05, 0.1);
-  const bifurcation = dir(0.8, 0.02, 0.6);
-  addTube(m1Start, bifurcation, 0.03);
-  grow(bifurcation, dir(0.55, 0.5, 0.65), 0.021, depth - 1);
-  grow(bifurcation, dir(0.6, -0.4, 0.7), 0.021, depth - 1);
+  const bifurcation = dir(...anatomy.bifurcation);
+  addTube(m1Start, bifurcation, anatomy.trunkRadius);
+  grow(bifurcation, dir(...anatomy.upper), 0.021, depth - 1);
+  grow(bifurcation, dir(...anatomy.lower), 0.021, depth - 1);
 
-  const base = lifted(bifurcation, 0.03);
+  const base = lifted(bifurcation, anatomy.trunkRadius);
   const normal = base.clone().normalize();
-  const radius = 0.065;
+  const radius = anatomy.sacRadius;
   const center = base.clone().addScaledVector(normal, radius * 0.9);
 
   return { geometry: mergeGeometries(tubes, false), segments: tubes.length, midpoints: mids, aneurysm: { center, radius, neck: base } };

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { pulse, retract } from '../lib/pulse';
 import { useSession } from '../state/session';
+import { paletteFor, useSettings } from '../state/settings';
 import { surgery } from '../sim/surgeryStore';
 import { useVitals } from '../sim/vitalsStore';
 import { bleedRateOf, useSim, type V3 } from '../tools/toolSim';
@@ -33,9 +34,11 @@ export function ToolEffects({ tip }: { tip: THREE.Vector3 }) {
   const clampPos = useSim((s) => s.clamp.pos);
 
   const decalGeo = useMemo(() => new THREE.CircleGeometry(1, 20), []);
+  const skipBlood = useSettings((s) => s.skipBlood);
+  const pal = paletteFor(useSettings((s) => s.colorblind));
   const decalMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#5a0a10', roughness: 0.15, polygonOffset: true, polygonOffsetFactor: -2 }),
-    [],
+    () => new THREE.MeshStandardMaterial({ color: pal.decal, roughness: 0.15, polygonOffset: true, polygonOffsetFactor: -2 }),
+    [pal.decal],
   );
 
   useEffect(() => {
@@ -96,7 +99,7 @@ export function ToolEffects({ tip }: { tip: THREE.Vector3 }) {
 
     const b = bleeder.current;
     if (b) {
-      b.visible = s.bleeder !== null;
+      b.visible = s.bleeder !== null && !useSettings.getState().skipBlood;
       if (s.bleeder) {
         const k = 0.012 + 0.03 * s.bleeder.size * (1 + 0.25 * pulse.value);
         b.position.set(...s.bleeder.pos);
@@ -118,10 +121,10 @@ export function ToolEffects({ tip }: { tip: THREE.Vector3 }) {
   return (
     <group ref={root}>
       <BloodParticles />
-      <instancedMesh ref={decals} args={[decalGeo, decalMat, MAX_DECALS]} frustumCulled={false} raycast={() => null} />
+      <instancedMesh ref={decals} visible={!skipBlood} args={[decalGeo, decalMat, MAX_DECALS]} frustumCulled={false} raycast={() => null} />
       <mesh ref={bleeder} visible={false} raycast={() => null}>
         <sphereGeometry args={[1, 16, 12]} />
-        <meshPhysicalMaterial color="#8b0000" roughness={0.1} clearcoat={1} />
+        <meshPhysicalMaterial color={pal.bleeder} roughness={0.1} clearcoat={1} />
       </mesh>
       <mesh ref={blade} visible={false} raycast={() => null}>
         <boxGeometry args={[0.2, 0.012, 0.1]} />
