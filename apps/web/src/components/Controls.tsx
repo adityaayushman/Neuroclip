@@ -6,7 +6,7 @@ export function Controls() {
   const fine = useSession((s) => s.fine);
   const setFocus = useSession((s) => s.setFocus);
   return (
-    <div className="absolute bottom-4 left-4 w-56 rounded bg-black/70 p-3 text-xs text-slate-300">
+    <div className="absolute left-4 top-10 w-56 rounded bg-black/70 p-3 text-xs text-slate-300">
       <div className="mb-2 flex justify-between">
         <span>Zoom {zoom.toFixed(1)}x</span>
         <span className={fine ? 'text-emerald-400' : 'text-slate-500'}>{fine ? 'FINE' : 'normal'}</span>

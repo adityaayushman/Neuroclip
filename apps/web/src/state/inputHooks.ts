@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { toolForKey } from '@neuroclip/shared';
+import { useSim } from '../tools/toolSim';
 import { useSession } from './session';
 
 export function useMicroscopeInput() {
@@ -12,6 +14,10 @@ export function useMicroscopeInput() {
       if (e.key === 'F3') {
         e.preventDefault();
         useSession.getState().toggleDebug();
+      }
+      if (e.type === 'keydown' && !e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1) {
+        const tool = toolForKey(e.key);
+        if (tool) useSim.getState().selectTool(tool);
       }
       if (e.key === 'Shift') useSession.getState().setFine(e.type === 'keydown');
     };

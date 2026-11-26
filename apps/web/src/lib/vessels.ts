@@ -6,6 +6,7 @@ import { mulberry32 } from './rng';
 export interface VesselTree {
   geometry: THREE.BufferGeometry;
   segments: number;
+  midpoints: THREE.Vector3[];
   aneurysm: { center: THREE.Vector3; radius: number; neck: THREE.Vector3 };
 }
 
@@ -14,6 +15,7 @@ const dir = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z).norm
 export function createVesselTree(seed = 1, depth = 3): VesselTree {
   const rand = mulberry32(seed);
   const tubes: THREE.BufferGeometry[] = [];
+  const mids: THREE.Vector3[] = [];
 
   const lifted = (d: THREE.Vector3, r: number) => {
     const p = surfacePoint(d);
@@ -28,7 +30,9 @@ export function createVesselTree(seed = 1, depth = 3): VesselTree {
       if (i > 0 && i < n) d.add(new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).multiplyScalar(0.05));
       pts.push(lifted(d.normalize(), r));
     }
-    tubes.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, r, 8, false));
+    const curve = new THREE.CatmullRomCurve3(pts);
+    mids.push(curve.getPoint(0.5));
+    tubes.push(new THREE.TubeGeometry(curve, 24, r, 8, false));
   };
 
   const grow = (a: THREE.Vector3, b: THREE.Vector3, r: number, d: number) => {
@@ -52,5 +56,5 @@ export function createVesselTree(seed = 1, depth = 3): VesselTree {
   const radius = 0.065;
   const center = base.clone().addScaledVector(normal, radius * 0.9);
 
-  return { geometry: mergeGeometries(tubes, false), segments: tubes.length, aneurysm: { center, radius, neck: base } };
+  return { geometry: mergeGeometries(tubes, false), segments: tubes.length, midpoints: mids, aneurysm: { center, radius, neck: base } };
 }

@@ -17,6 +17,11 @@ test('renders scene, aperture, debug overlay within draw-call budget', async ({ 
   await page.evaluate(() => window.dispatchEvent(new WheelEvent('wheel', { deltaY: -600, cancelable: true })));
   await expect(page.getByTestId('aperture')).not.toHaveAttribute('data-zoom', '1');
 
+  await page.keyboard.press('3');
+  await expect(page.getByTestId('tool-microscissors')).toHaveAttribute('aria-pressed', 'true');
+  await page.keyboard.press('0');
+  await expect(page.getByTestId('doppler')).toBeVisible();
+
   await page.getByTestId('focus-slider').fill('0.9');
   await expect(page.getByTestId('focus-slider')).toHaveValue('0.9');
   expect(errors).toEqual([]);

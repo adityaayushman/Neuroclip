@@ -7,6 +7,10 @@ import { createBrainGeometry } from '../lib/brain';
 import { applyPulse, pulse, pulseWave } from '../lib/pulse';
 import { createVesselTree } from '../lib/vessels';
 import { useSession } from '../state/session';
+import type { TargetKind } from '../tools/toolDefs';
+import { useSim, type V3 } from '../tools/toolSim';
+import { ptr } from './pointerState';
+import { ToolEffects } from './ToolEffects';
 
 const BASE_FOV = 40;
 const NEAR = 0.1;
@@ -59,6 +63,11 @@ function Tissue() {
   const tree = useMemo(() => createVesselTree(SEED), []);
   const sacCenter = tree.aneurysm.center;
 
+  useEffect(() => {
+    const m = tree.midpoints[1]!;
+    useSim.getState().reset([m.x, m.y, m.z]);
+  }, [tree]);
+
   const brainMat = useMemo(() => {
     const m = new THREE.MeshPhysicalMaterial({
       color: '#c58b86',
@@ -90,20 +99,38 @@ function Tissue() {
     lastHit.copy(e.point);
     hasHit = true;
     tipVisible = true;
+    ptr.visible = true;
+    ptr.target = (e.object.userData.kind as TargetKind | undefined) ?? 'brain';
     useSession.getState().setFine(fine);
   };
   const leave = () => {
     hasHit = false;
     tipVisible = false;
+    ptr.visible = false;
+  };
+  const down = (e: ThreeEvent<PointerEvent>) => {
+    e.stopPropagation();
+    ptr.down = true;
+    const l = e.eventObject.worldToLocal(e.point.clone());
+    const point: V3 = [l.x, l.y, l.z];
+    useSim.getState().use({
+      target: (e.object.userData.kind as TargetKind | undefined) ?? 'brain',
+      point,
+      fine: e.shiftKey,
+      dtMs: 0,
+      down: true,
+      click: true,
+    });
   };
 
   return (
-    <group rotation={[0, -0.93, 0]} onPointerMove={move} onPointerOut={leave}>
-      <mesh geometry={brain} material={brainMat} />
-      <mesh geometry={tree.geometry} material={vesselMat} />
-      <mesh position={sacCenter} material={sacMat}>
+    <group rotation={[0, -0.93, 0]} onPointerMove={move} onPointerOut={leave} onPointerDown={down}>
+      <mesh geometry={brain} material={brainMat} userData={{ kind: 'brain' }} />
+      <mesh geometry={tree.geometry} material={vesselMat} userData={{ kind: 'vessel' }} />
+      <mesh position={sacCenter} material={sacMat} userData={{ kind: 'sac' }}>
         <sphereGeometry args={[tree.aneurysm.radius, 24, 16]} />
       </mesh>
+      <ToolEffects tip={tipTarget} />
     </group>
   );
 }
