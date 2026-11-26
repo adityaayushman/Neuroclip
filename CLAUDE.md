@@ -22,14 +22,11 @@ Browser-based educational MCA aneurysm clipping simulator (pterional approach). 
 - Visible educational-use disclaimer must stay in the UI.
 
 ## Milestones
-- [x] 1. Monorepo skeleton, CI, placeholder brain mesh, microscope aperture
-- [ ] 2. Microscope controls: zoom 1x-4x, focus slider, depth-of-field
-- [ ] 3. Tool system (keys 1-0), effects and failure modes
-- [ ] 4. Six-step procedure flow on XState, modes (Guided/Expert/Emergency)
-- [ ] 5. Vitals simulation and panel with alarms; bleeding/rupture model
-- [ ] 6. Mentor panel (scripted) and telemetry capture
-- [ ] 7. API: runs, server-side scoring, leaderboard, Alembic, Postgres
-- [ ] 8. Debrief screen
-- [ ] 9. ML skill score: training, ONNX export, in-browser worker inference
-- [ ] 10. LLM mentor Q&A endpoint
-- [ ] 11. Real GLB assets, perf pass, Vercel/Fly.io deploy
+- [x] 0. Monorepo skeleton, CI, placeholder brain, aperture
+- [x] M1 Scene: aperture/vignette, wheel zoom 1-4x, focus slider + DOF, wet PBR brain, HR-driven vertex pulsation, procedural vessel tree + MCA aneurysm sac, raycast tool tip with Shift fine mode, FPS/draw-call overlay (F3)
+- [ ] M2 Tools: ten tools in src/tools (toolDefs.ts), keys 1-0, tool belt UI, visible effects, failure-rule unit tests
+- [ ] M3 Steps and mentor: surgeryMachine.ts (XState), step checklist rail, mentor captions, speech synthesis
+- [ ] M4 Vitals and rupture: vitalsModel.ts, sparklines/tiles/alarms, Web Audio beep, rupture + recovery
+- [ ] M5 Backend: sessions, gzip telemetry, server-side scoring, debrief, leaderboard (Redis), SSE mentor, Alembic, RLS, rate limits, web client
+- [ ] M6 ML: headless agents, 20k runs, GBM + CNN-GRU skill + LSTM rupture risk, int8 ONNX, worker inference at 10 Hz
+- [ ] M7 Polish and launch: intro, sound, share card, GIF replay, Emergency mode, anatomy seeds, settings, references, Lighthouse, README, Vercel + Fly.io deploy

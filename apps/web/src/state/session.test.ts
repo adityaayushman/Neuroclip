@@ -12,6 +12,18 @@ describe('session store', () => {
   });
 });
 
+describe('session store extras', () => {
+  it('bounds focus and heart rate and toggles fine mode', () => {
+    const s = useSession.getState();
+    s.setFocus(5);
+    s.setHr(500);
+    s.setFine(true);
+    expect(useSession.getState()).toMatchObject({ focus: 1, hr: 200, fine: true });
+    s.setHr(-3);
+    expect(useSession.getState().hr).toBe(30);
+  });
+});
+
 describe('step machine', () => {
   it('walks six steps then finishes', () => {
     const a = createActor(stepMachine).start();
