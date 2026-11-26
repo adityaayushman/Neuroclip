@@ -46,7 +46,7 @@ describe('surgery machine', () => {
     expect(state(a)).toBe('doppler_closure');
     send(fact('retract_off'));
     expect(visited).toEqual([...STEPS, 'done']);
-    expect(a.getSnapshot().status).toBe('done');
+    expect(a.getSnapshot().matches('done')).toBe(true);
     expect(a.getSnapshot().context.timeline).toHaveLength(6);
     expect(a.getSnapshot().context.errors).toHaveLength(0);
   });

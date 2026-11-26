@@ -43,6 +43,6 @@ export const surgeryMachine = setup({
     neck_parent_exposure: stateFor('neck_parent_exposure'),
     clip_placement: stateFor('clip_placement'),
     doppler_closure: stateFor('doppler_closure'),
-    done: { type: 'final' },
+    done: {},
   },
 });

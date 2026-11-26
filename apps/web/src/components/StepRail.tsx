@@ -7,7 +7,7 @@ const MODES: Mode[] = ['guided', 'expert', 'emergency'];
 
 export function StepRail() {
   const step = useSurgery((s) => s.context.step);
-  const done = useSurgery((s) => s.status === 'done');
+  const done = useSurgery((s) => s.matches('done'));
   const progress = useSurgery((s) => s.context.progress);
   const world = useSurgery((s) => s.context.world);
   const mode = useSession((s) => s.mode);
@@ -17,7 +17,7 @@ export function StepRail() {
   return (
     <aside
       data-testid="step-rail"
-      className="absolute left-4 top-48 max-h-[calc(100vh-17rem)] w-56 overflow-y-auto rounded bg-black/70 p-3 text-xs text-slate-300"
+      className="absolute left-4 top-60 max-h-[calc(100vh-24rem)] w-56 overflow-y-auto rounded bg-black/70 p-3 text-xs text-slate-300"
     >
       <label className="mb-2 flex items-center justify-between">
         Mode

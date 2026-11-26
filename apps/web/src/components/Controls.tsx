@@ -1,3 +1,4 @@
+import { useRun } from '../state/run';
 import { useSession } from '../state/session';
 
 export function Controls() {
@@ -5,6 +6,7 @@ export function Controls() {
   const zoom = useSession((s) => s.zoom);
   const fine = useSession((s) => s.fine);
   const setFocus = useSession((s) => s.setFocus);
+  const openRun = useRun((s) => s.open);
   return (
     <div className="absolute left-4 top-10 w-56 rounded bg-black/70 p-3 text-xs text-slate-300">
       <div className="mb-2 flex justify-between">
@@ -26,6 +28,13 @@ export function Controls() {
         />
       </label>
       <p className="mt-2 text-slate-500">Wheel: zoom · Shift: fine mode · F3: debug</p>
+      <button
+        data-testid="finish-btn"
+        onClick={openRun}
+        className="mt-2 w-full rounded bg-emerald-700 px-2 py-1 text-white hover:bg-emerald-600"
+      >
+        Finish run
+      </button>
     </div>
   );
 }
