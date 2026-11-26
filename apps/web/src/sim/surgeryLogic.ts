@@ -1,6 +1,6 @@
 import { STEPS, type Mode, type Step } from '@neuroclip/shared';
 import type { SimFact } from './events';
-import { ERROR_LINES, SLOW_LINE, STEP_INTRO, mentorAudible, wrongToolLine, type MentorKind, type MentorLine } from './mentor';
+import { ALARM_LINES, ERROR_LINES, RUPTURE_CUE, SLOW_LINE, STEP_INTRO, mentorAudible, wrongToolLine, type MentorKind, type MentorLine } from './mentor';
 import { STEP_DEFS, itemDone, stepDef, type Progress, type World } from './steps';
 import type { Severity } from '../tools/toolDefs';
 
@@ -51,10 +51,19 @@ export const initialContext = (mode: Mode): SurgeryContext => ({
   mentorSeq: 0,
 });
 
+const HOLD_MS = 5000;
+const RANK: Record<Severity, number> = { rupture: 3, injury: 2, warning: 1, info: 0 };
+const rankOf = (kind: MentorKind, severity?: Severity) => (kind === 'error' ? RANK[severity ?? 'warning'] : 0);
+
 function say(c: SurgeryContext, text: string, kind: MentorKind, severity?: Severity): SurgeryContext {
   if (!mentorAudible(c.mode, kind, severity)) return c;
+  const cur = c.mentor;
+  if (cur && c.clockMs - cur.at < HOLD_MS) {
+    const held = rankOf(cur.kind, cur.severity);
+    if (held >= RANK.injury && rankOf(kind, severity) < held) return c;
+  }
   const seq = c.mentorSeq + 1;
-  return { ...c, mentorSeq: seq, mentor: { id: seq, text, kind, severity } };
+  return { ...c, mentorSeq: seq, mentor: { id: seq, text, kind, severity, at: c.clockMs } };
 }
 
 function recordError(c: SurgeryContext, tool: string, code: string, severity: Severity, text: string): SurgeryContext {
@@ -113,9 +122,12 @@ export function applyEvent(c: SurgeryContext, e: SurgeryEvent): SurgeryContext {
     }
     case 'FAILURE': {
       if (e.severity === 'info') return c;
-      const text = ERROR_LINES[e.code] ?? 'Check your technique.';
+      const base = ERROR_LINES[e.code] ?? 'Check your technique.';
+      const text = e.severity === 'rupture' && c.mode !== 'expert' ? `${base} ${RUPTURE_CUE}` : base;
       return recordError(c, e.tool, e.code, e.severity, text);
     }
+    case 'ALARM':
+      return recordError(c, 'vitals', `alarm_${e.code}`, 'injury', ALARM_LINES[e.code] ?? 'Check the monitor.');
     case 'CONFIRM': {
       const it = stepDef(c.step).items.find((i) => i.id === e.itemId && i.confirm);
       if (!it || (c.progress[it.id] ?? 0) >= it.target) return c;

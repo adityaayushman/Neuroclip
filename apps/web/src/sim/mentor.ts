@@ -8,6 +8,7 @@ export interface MentorLine {
   text: string;
   kind: MentorKind;
   severity?: Severity;
+  at: number;
 }
 
 export const STEP_INTRO: Record<Step, string> = {
@@ -36,7 +37,19 @@ export const ERROR_LINES: Record<string, string> = {
   parent_vessel_occlusion: 'The clip is occluding the parent vessel. Reposition it across the neck only.',
   sac_clip_rupture: 'You crossed the sac too fast. Advance the clip slowly in fine mode.',
   clip_misplaced: 'That clip is not on the aneurysm neck. Reposition it.',
+  sac_rupture: 'The aneurysm has ruptured!',
   doppler_no_signal: 'No signal. Place the probe on the vessel or the sac.',
+};
+
+export const RUPTURE_CUE = 'Suction to clear the field, then bipolar the bleeding point.';
+
+export const ALARM_LINES: Record<string, string> = {
+  hypotension: 'Blood pressure is dangerously low. Control the bleeding now.',
+  hypertension: 'Blood pressure is very high. Tell anesthesia and check depth.',
+  tachycardia: 'Heart rate is critically high. Look for bleeding or light anesthesia.',
+  bradycardia: 'Heart rate is critically low. Check ICP and anesthesia depth.',
+  hypoxia: 'Oxygen saturation is critically low. Ask anesthesia to check the airway.',
+  icp_high: 'ICP is critically high. Release the retractor and the temporary clip.',
 };
 
 export const SLOW_LINE = 'This step is taking longer than expected. Re-read the checklist and keep moving.';

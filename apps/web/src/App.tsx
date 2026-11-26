@@ -2,6 +2,7 @@ import { Aperture } from './components/Aperture';
 import { Controls } from './components/Controls';
 import { DebugOverlay } from './components/DebugOverlay';
 import { Disclaimer } from './components/Disclaimer';
+import { VitalsPanel } from './components/VitalsPanel';
 import { MentorBar } from './components/MentorBar';
 import { StepRail } from './components/StepRail';
 import { DopplerPanel } from './components/DopplerPanel';
@@ -22,6 +23,7 @@ export function App() {
       <Disclaimer />
       <Controls />
       <DebugOverlay />
+      <VitalsPanel />
       <ToolHud />
       <DopplerPanel />
       <StepRail />

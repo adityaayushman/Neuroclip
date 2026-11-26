@@ -14,6 +14,7 @@ export type FactName =
 export type SimFact =
   | { type: 'USE'; tool: ToolId; target: TargetKind; fine: boolean; dtMs: number }
   | { type: 'FACT'; fact: FactName }
-  | { type: 'FAILURE'; tool: ToolId; code: string; severity: Severity };
+  | { type: 'FAILURE'; tool: ToolId; code: string; severity: Severity }
+  | { type: 'ALARM'; code: string };
 
 export const simHooks: { onFact?: (f: SimFact) => void } = {};

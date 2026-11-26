@@ -25,6 +25,11 @@ test('renders scene, aperture, debug overlay within draw-call budget', async ({ 
   await page.keyboard.press('0');
   await expect(page.getByTestId('doppler')).toBeVisible();
 
+  await expect(page.getByTestId('vitals')).toBeVisible();
+  await page.getByTestId('rupture-btn').click();
+  await expect(page.getByTestId('mentor')).toContainText('ruptured');
+  await expect(page.getByTestId('blood-loss')).not.toContainText('~0 mL', { timeout: 30_000 });
+
   await page.getByTestId('focus-slider').fill('0.9');
   await expect(page.getByTestId('focus-slider')).toHaveValue('0.9');
   expect(errors).toEqual([]);

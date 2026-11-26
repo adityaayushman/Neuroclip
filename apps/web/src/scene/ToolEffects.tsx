@@ -4,7 +4,9 @@ import * as THREE from 'three';
 import { pulse, retract } from '../lib/pulse';
 import { useSession } from '../state/session';
 import { surgery } from '../sim/surgeryStore';
-import { useSim, type V3 } from '../tools/toolSim';
+import { useVitals } from '../sim/vitalsStore';
+import { bleedRateOf, useSim, type V3 } from '../tools/toolSim';
+import { BloodParticles } from './BloodParticles';
 import { ptr } from './pointerState';
 
 const MAX_DECALS = 32;
@@ -63,6 +65,12 @@ export function ToolEffects({ tip }: { tip: THREE.Vector3 }) {
       });
     }
     sim.tick(dt * 1000);
+    const cur = useSim.getState();
+    useVitals.getState().step(dt, {
+      bleedRate: bleedRateOf(cur.bleeder),
+      retractionMs: cur.retraction.on ? cur.retraction.totalMs : 0,
+      clampMs: cur.clamp.on ? cur.clamp.totalMs : 0,
+    });
     tickAcc.current += dt * 1000;
     if (tickAcc.current >= 250) {
       surgery.send({ type: 'TICK', dtMs: tickAcc.current });
@@ -109,6 +117,7 @@ export function ToolEffects({ tip }: { tip: THREE.Vector3 }) {
 
   return (
     <group ref={root}>
+      <BloodParticles />
       <instancedMesh ref={decals} args={[decalGeo, decalMat, MAX_DECALS]} frustumCulled={false} raycast={() => null} />
       <mesh ref={bleeder} visible={false} raycast={() => null}>
         <sphereGeometry args={[1, 16, 12]} />

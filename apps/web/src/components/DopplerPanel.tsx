@@ -41,7 +41,7 @@ export function DopplerPanel() {
   if (!active) return null;
   const label = { none: 'No signal', flow: 'Flow detected', clamped: 'Flow absent (clamped)' }[state];
   return (
-    <div data-testid="doppler" className="absolute right-4 top-40 rounded bg-black/80 p-2 text-xs text-emerald-300">
+    <div data-testid="doppler" className="absolute right-4 top-[22.5rem] rounded bg-black/80 p-2 text-xs text-emerald-300">
       <div className="mb-1">Doppler: {label}</div>
       <canvas ref={canvas} width={W} height={H} className="rounded bg-slate-950" />
     </div>

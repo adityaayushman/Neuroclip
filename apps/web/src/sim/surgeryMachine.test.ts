@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { FAILURE_CODES, TOOL_DEFS, type TargetKind, type UseContext } from '../tools/toolDefs';
 import { useSim } from '../tools/toolSim';
 import { simHooks, type SimFact } from './events';
-import { ERROR_LINES, STEP_INTRO } from './mentor';
+import { ALARM_LINES, ERROR_LINES, STEP_INTRO } from './mentor';
 import { STEP_DEFS } from './steps';
 import { surgeryMachine } from './surgeryMachine';
 
@@ -79,10 +79,23 @@ describe('surgery machine', () => {
   it('tool failures map to their scripted mentor line', () => {
     const a = start();
     a.send({ type: 'FAILURE', tool: 'microscissors', code: 'vessel_nick', severity: 'rupture' });
-    expect(a.getSnapshot().context.mentor?.text).toBe(ERROR_LINES.vessel_nick);
+    expect(a.getSnapshot().context.mentor?.text).toContain(ERROR_LINES.vessel_nick);
+    expect(a.getSnapshot().context.mentor?.text).toContain('bipolar');
     expect(a.getSnapshot().context.mentor?.severity).toBe('rupture');
     a.send({ type: 'FAILURE', tool: 'doppler', code: 'hemostasis', severity: 'info' });
     expect(a.getSnapshot().context.errors).toHaveLength(1);
+  });
+
+  it('holds a serious message against low-priority ones for a few seconds', () => {
+    const a = start();
+    a.send({ type: 'FAILURE', tool: 'microscissors', code: 'vessel_nick', severity: 'rupture' });
+    const held = a.getSnapshot().context.mentor!.text;
+    a.send(use('doppler'));
+    a.send({ type: 'FAILURE', tool: 'doppler', code: 'doppler_no_signal', severity: 'warning' });
+    expect(a.getSnapshot().context.mentor!.text).toBe(held);
+    a.send({ type: 'TICK', dtMs: 6000 });
+    a.send({ type: 'FAILURE', tool: 'doppler', code: 'doppler_no_signal', severity: 'warning' });
+    expect(a.getSnapshot().context.mentor!.text).toContain('No signal');
   });
 
   it('expert mode hides hints but still reports ruptures', () => {
@@ -93,6 +106,7 @@ describe('surgery machine', () => {
     expect(a.getSnapshot().context.errors).toHaveLength(1);
     a.send({ type: 'FAILURE', tool: 'dissector', code: 'sac_dissection_tear', severity: 'rupture' });
     expect(a.getSnapshot().context.mentor?.text).toBe(ERROR_LINES.sac_dissection_tear);
+    expect(a.getSnapshot().context.mentor?.text).not.toContain('bipolar');
   });
 
   it('nudges after a step exceeds its soft time limit, once', () => {
@@ -143,7 +157,14 @@ describe('sim to machine bridge', () => {
     sim.selectTool('microscissors');
     sim.use({ target: 'vessel', point: [0, 0, 0], fine: false, dtMs: 0, down: true, click: true });
     expect(a.getSnapshot().context.errors.map((e) => e.code)).toContain('vessel_nick');
-    expect(a.getSnapshot().context.mentor?.text).toBe(ERROR_LINES.vessel_nick);
+    expect(a.getSnapshot().context.mentor?.text).toContain(ERROR_LINES.vessel_nick);
+  });
+
+  it('vitals alarms reach the mentor and error log', () => {
+    const a = start();
+    a.send({ type: 'ALARM', code: 'hypotension' });
+    expect(a.getSnapshot().context.mentor?.text).toBe(ALARM_LINES.hypotension);
+    expect(a.getSnapshot().context.errors.map((e) => e.code)).toEqual(['alarm_hypotension']);
   });
 
   it('sim facts advance checklist progress', () => {

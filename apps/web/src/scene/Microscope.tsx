@@ -8,6 +8,7 @@ import { applyPulse, pulse, pulseWave } from '../lib/pulse';
 import { createVesselTree } from '../lib/vessels';
 import { useSession } from '../state/session';
 import type { TargetKind } from '../tools/toolDefs';
+import { useVitals } from '../sim/vitalsStore';
 import { useSim, type V3 } from '../tools/toolSim';
 import { ptr } from './pointerState';
 import { ToolEffects } from './ToolEffects';
@@ -65,7 +66,9 @@ function Tissue() {
 
   useEffect(() => {
     const m = tree.midpoints[1]!;
-    useSim.getState().reset([m.x, m.y, m.z]);
+    const sac = tree.aneurysm.center;
+    useSim.getState().reset([m.x, m.y, m.z], [sac.x, sac.y, sac.z]);
+    useVitals.getState().reset();
   }, [tree]);
 
   const brainMat = useMemo(() => {

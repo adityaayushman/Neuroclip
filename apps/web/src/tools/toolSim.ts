@@ -29,16 +29,35 @@ export interface UseInput {
   click: boolean;
 }
 
+export const OOZE_RATE = 0.0006;
+export const RUPTURE_RATE = 0.012;
+const RETRACTION_BLEED_RATE = 0.002;
+const BLIND_POOL = 8;
+const POOL_RADIUS = 0.15;
 const MAX_DECALS = 24;
 const EVENT_THROTTLE_MS = 1500;
 const dist = (a: V3, b: V3) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 let rand = mulberry32(1);
 
+export interface Bleeder {
+  pos: V3;
+  size: number;
+  rate: number;
+}
+
+const merge = (old: Bleeder | null, nu: Bleeder): Bleeder =>
+  old ? { pos: nu.rate >= old.rate ? nu.pos : old.pos, size: Math.max(old.size, nu.size), rate: Math.max(old.rate, nu.rate) } : nu;
+
+export const bleedRateOf = (b: Bleeder | null) => (b ? b.rate * b.size : 0);
+export const poolAround = (decals: Decal[], pos: V3) =>
+  decals.reduce((sum, d) => (dist(d.pos, pos) < POOL_RADIUS ? sum + d.a : sum), 0);
+
 interface SimState {
   activeTool: ToolId;
   clock: number;
   decals: Decal[];
-  bleeder: { pos: V3; size: number } | null;
+  bleeder: Bleeder | null;
+  sacPos: V3 | null;
   oozeAcc: number;
   retraction: { on: boolean; totalMs: number; center: V3 };
   clamp: { on: boolean; totalMs: number; pos: V3 };
@@ -46,12 +65,13 @@ interface SimState {
   events: SimEvent[];
   lastFail: Record<string, number>;
   doppler: DopplerState;
-  counters: { cuts: number; dissections: number; irrigations: number };
+  counters: { cuts: number; dissections: number; irrigations: number; ruptures: number };
   heldMs: number;
   lastTarget: TargetKind;
   nextId: number;
   selectTool: (id: ToolId) => void;
-  reset: (bleederPos?: V3) => void;
+  reset: (bleederPos?: V3, sacPos?: V3) => void;
+  rupture: (point?: V3) => void;
   use: (i: UseInput) => void;
   tick: (dtMs: number) => void;
 }
@@ -60,6 +80,7 @@ const initial = () => ({
   clock: 0,
   decals: [] as Decal[],
   bleeder: null as SimState['bleeder'],
+  sacPos: null as V3 | null,
   oozeAcc: 0,
   retraction: { on: false, totalMs: 0, center: [0, 0, 0] as V3 },
   clamp: { on: false, totalMs: 0, pos: [0, 0, 0] as V3 },
@@ -67,7 +88,7 @@ const initial = () => ({
   events: [] as SimEvent[],
   lastFail: {} as Record<string, number>,
   doppler: 'none' as DopplerState,
-  counters: { cuts: 0, dissections: 0, irrigations: 0 },
+  counters: { cuts: 0, dissections: 0, irrigations: 0, ruptures: 0 },
   heldMs: 0,
   lastTarget: 'none' as TargetKind,
   nextId: 1,
@@ -82,12 +103,13 @@ function spawnDecal(around: V3, id: number): Decal {
 export const useSim = create<SimState>((set, get) => {
   const emit = (s: SimState, tool: ToolId, f: Failure, n: Partial<SimState>) => {
     const last = (n.lastFail ?? s.lastFail)[f.code] ?? -Infinity;
-    if (s.clock - last < EVENT_THROTTLE_MS) return;
+    if (s.clock - last < EVENT_THROTTLE_MS) return false;
     const nextId = n.nextId ?? s.nextId;
     n.events = [...(n.events ?? s.events), { ...f, id: nextId, t: s.clock, tool }].slice(-30);
     n.lastFail = { ...(n.lastFail ?? s.lastFail), [f.code]: s.clock };
     n.nextId = nextId + 1;
     if (f.severity !== 'info') simHooks.onFact?.({ type: 'FAILURE', tool, code: f.code, severity: f.severity });
+    return true;
   };
   const fact = (fact: FactName) => simHooks.onFact?.({ type: 'FACT', fact });
 
@@ -95,16 +117,27 @@ export const useSim = create<SimState>((set, get) => {
     activeTool: 'suction',
     ...initial(),
     selectTool: (activeTool) => set({ activeTool, heldMs: 0 }),
-    reset: (bleederPos) => {
+    reset: (bleederPos, sacPos) => {
       rand = mulberry32(1);
       const s = get();
       const next: Partial<SimState> = { ...initial() };
       if (bleederPos) {
-        next.bleeder = { pos: bleederPos, size: 1 };
+        next.bleeder = { pos: bleederPos, size: 1, rate: OOZE_RATE };
         next.decals = Array.from({ length: 6 }, (_, i) => spawnDecal(bleederPos, i + 1));
         next.nextId = 7;
       }
+      if (sacPos) next.sacPos = sacPos;
       set({ ...next, activeTool: s.activeTool });
+    },
+    rupture: (point) => {
+      const s = get();
+      const pos = point ?? s.sacPos ?? s.bleeder?.pos;
+      if (!pos) return;
+      set({
+        bleeder: merge(s.bleeder, { pos, size: 1.5, rate: RUPTURE_RATE }),
+        counters: { ...s.counters, ruptures: s.counters.ruptures + 1 },
+      });
+      simHooks.onFact?.({ type: 'FAILURE', tool: s.activeTool, code: 'sac_rupture', severity: 'rupture' });
     },
     use: (i) => {
       const s = get();
@@ -133,7 +166,8 @@ export const useSim = create<SimState>((set, get) => {
       };
       simHooks.onFact?.({ type: 'USE', tool: def.id, target: i.target, fine: i.fine, dtMs: i.dtMs });
       const failure = def.failure(ctx);
-      if (failure) emit(s, def.id, failure, n);
+      const emitted = failure ? emit(s, def.id, failure, n) : false;
+      const ruptured = emitted && failure?.severity === 'rupture';
 
       const sec = i.dtMs / 1000;
       switch (def.effect) {
@@ -151,7 +185,8 @@ export const useSim = create<SimState>((set, get) => {
         }
         case 'coagulate':
           if (s.bleeder && dist(s.bleeder.pos, i.point) < 0.09) {
-            const size = s.bleeder.size - sec * (i.fine ? 0.6 : 0.35);
+            const blind = poolAround(s.decals, s.bleeder.pos) > BLIND_POOL ? 0.2 : 1;
+            const size = s.bleeder.size - sec * (i.fine ? 0.6 : 0.35) * blind;
             n.bleeder = size > 0 ? { ...s.bleeder, size } : null;
             if (size <= 0) {
               emit(s, def.id, { code: 'hemostasis', severity: 'info', message: 'Bleeder controlled.' }, n);
@@ -186,6 +221,10 @@ export const useSim = create<SimState>((set, get) => {
           if (n.doppler !== s.doppler && n.doppler !== 'none') fact(n.doppler === 'flow' ? 'doppler_flow' : 'doppler_clamped');
           break;
       }
+      if (ruptured) {
+        n.bleeder = merge(n.bleeder === undefined ? s.bleeder : n.bleeder, { pos: i.point, size: 1.5, rate: RUPTURE_RATE });
+        n.counters = { ...(n.counters ?? s.counters), ruptures: (n.counters ?? s.counters).ruptures + 1 };
+      }
       set(n);
     },
     tick: (dt) => {
@@ -203,18 +242,22 @@ export const useSim = create<SimState>((set, get) => {
       };
       if (s.retraction.on) {
         const f = TOOL_DEFS.retractor.failure(ctx);
-        if (f) emit(s, 'retractor', f, n);
+        if (f && emit(s, 'retractor', f, n)) {
+          n.bleeder = merge(s.bleeder, { pos: s.retraction.center, size: 1, rate: RETRACTION_BLEED_RATE });
+        }
       }
       if (s.clamp.on) {
         const f = TOOL_DEFS.temporary_clip.failure(ctx);
         if (f) emit(s, 'temporary_clip', f, n);
       }
-      if (s.bleeder) {
-        let acc = s.oozeAcc + (dt / 1000) * s.bleeder.size;
+      const bleeder = n.bleeder === undefined ? s.bleeder : n.bleeder;
+      if (bleeder) {
+        const mult = Math.min(8, Math.sqrt(bleeder.rate / OOZE_RATE));
+        let acc = s.oozeAcc + (dt / 1000) * bleeder.size * mult;
         if (acc >= 0.6) {
           acc = 0;
           if (s.decals.length < MAX_DECALS) {
-            n.decals = [...s.decals, spawnDecal(s.bleeder.pos, n.nextId ?? s.nextId)];
+            n.decals = [...s.decals, spawnDecal(bleeder.pos, n.nextId ?? s.nextId)];
             n.nextId = (n.nextId ?? s.nextId) + 1;
           }
         }

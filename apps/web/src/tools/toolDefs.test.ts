@@ -29,6 +29,7 @@ describe('failure rules', () => {
   });
   it('bipolar', () => {
     expect(f('bipolar', { target: 'sac' })).toBe('bipolar_thermal_injury');
+    expect(f('bipolar', { target: 'sac', bleeding: true })).toBeNull();
     expect(f('bipolar', { target: 'vessel', heldMs: 2000 })).toBe('bipolar_thermal_injury');
     expect(f('bipolar', { target: 'vessel', heldMs: 2000, bleeding: true })).toBeNull();
     expect(f('bipolar', { target: 'brain', heldMs: 3500 })).toBe('bipolar_thermal_injury');

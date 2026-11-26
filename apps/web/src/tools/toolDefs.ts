@@ -73,7 +73,7 @@ const defs: ToolDef[] = [
   {
     id: 'bipolar', key: '2', label: 'Bipolar', cursor: 'crosshair', mode: 'hold', effect: 'coagulate',
     failure: (c) =>
-      c.target === 'sac' ||
+      (c.target === 'sac' && !c.bleeding) ||
       (c.target === 'vessel' && !c.bleeding && c.heldMs > 1500) ||
       (c.target === 'brain' && c.heldMs > 3000)
         ? fail('bipolar_thermal_injury', 'injury', 'Thermal injury. Coagulate only the bleeder, never the sac.')

@@ -20,6 +20,7 @@ interface SessionState {
   fine: boolean;
   debug: boolean;
   speech: boolean;
+  audio: boolean;
   stats: Stats;
   setMode: (m: Mode) => void;
   setZoom: (z: number) => void;
@@ -28,6 +29,7 @@ interface SessionState {
   setFine: (f: boolean) => void;
   toggleDebug: () => void;
   setSpeech: (v: boolean) => void;
+  setAudio: (v: boolean) => void;
   setStats: (s: Stats) => void;
 }
 
@@ -39,6 +41,7 @@ export const useSession = create<SessionState>((set) => ({
   fine: false,
   debug: true,
   speech: false,
+  audio: false,
   stats: { fps: 0, calls: 0, triangles: 0 },
   setMode: (mode) => set({ mode }),
   setZoom: (z) => set({ zoom: clampZoom(z) }),
@@ -47,5 +50,6 @@ export const useSession = create<SessionState>((set) => ({
   setFine: (fine) => set((s) => (s.fine === fine ? s : { fine })),
   toggleDebug: () => set((s) => ({ debug: !s.debug })),
   setSpeech: (speech) => set({ speech }),
+  setAudio: (audio) => set({ audio }),
   setStats: (stats) => set({ stats }),
 }));

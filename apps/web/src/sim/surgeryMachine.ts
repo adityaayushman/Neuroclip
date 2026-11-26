@@ -30,6 +30,7 @@ export const surgeryMachine = setup({
     USE: { actions: 'apply' },
     FACT: { actions: 'apply' },
     FAILURE: { actions: 'apply' },
+    ALARM: { actions: 'apply' },
     CONFIRM: { actions: 'apply' },
     TICK: { actions: 'apply' },
     SET_MODE: { actions: 'apply' },
